@@ -99,12 +99,25 @@ public class AppointmentService {
     private void checkStaffAvailability(Staff staff, LocalDateTime startTime, Integer durationMinutes) {
         LocalDateTime endTime = startTime.plusMinutes(durationMinutes);
 
-        List<AppointmentItem> conflicts = appointmentItemRepository
-                .findConflictingAppointments(staff, startTime, endTime);
+        // Get all appointments for this staff around this time
+        LocalDateTime searchStart = startTime.minusMinutes(120); // 2 hours before
+        LocalDateTime searchEnd = endTime.plusMinutes(120);       // 2 hours after
 
-        if (!conflicts.isEmpty()) {
-            throw new AppointmentConflictException(
-                    "Staff is not available at " + startTime + ". Please choose another time or staff member.");
+        List<AppointmentItem> potentialConflicts = appointmentItemRepository
+                .findConflictingAppointments(staff, searchStart, searchEnd);
+
+        // Check each appointment for actual time conflict
+        for (AppointmentItem existing : potentialConflicts) {
+            LocalDateTime existingStart = existing.getScheduledTime();
+            LocalDateTime existingEnd = existingStart.plusMinutes(existing.getDurationMinutes());
+
+            // Check if times overlap
+            boolean hasConflict = (startTime.isBefore(existingEnd) && endTime.isAfter(existingStart));
+
+            if (hasConflict) {
+                throw new AppointmentConflictException(
+                        "Staff is not available at " + startTime + ". Please choose another time or staff member.");
+            }
         }
     }
 

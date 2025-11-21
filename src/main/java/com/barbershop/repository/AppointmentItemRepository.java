@@ -22,10 +22,10 @@ public interface AppointmentItemRepository extends JpaRepository<AppointmentItem
             @Param("end") LocalDateTime end
     );
 
+    // Simplified conflict check - we'll do time calculation in service layer
     @Query("SELECT ai FROM AppointmentItem ai WHERE " +
             "ai.staff = :staff AND " +
-            "ai.scheduledTime <= :endTime AND " +
-            "FUNCTION('DATE_ADD', ai.scheduledTime, INTERVAL ai.durationMinutes MINUTE) >= :startTime AND " +
+            "ai.scheduledTime BETWEEN :startTime AND :endTime AND " +
             "ai.status NOT IN ('CANCELLED')")
     List<AppointmentItem> findConflictingAppointments(
             @Param("staff") Staff staff,
