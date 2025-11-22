@@ -3,7 +3,10 @@ package com.barbershop.controller;
 import com.barbershop.model.dto.request.AppointmentCreateRequest;
 import com.barbershop.model.dto.response.ApiResponse;
 import com.barbershop.model.dto.response.AppointmentResponse;
+import com.barbershop.model.entity.User;
+import com.barbershop.security.UserPrincipal;
 import com.barbershop.service.AppointmentService;
+import com.barbershop.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,19 +27,18 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final UserService userService;
 
     /**
      * Create new appointment
      * POST /api/appointments
-     *
-     * For now, we'll use a hardcoded customerId (1)
-     * Later, we'll get it from JWT token
      */
     @PostMapping
     public ResponseEntity<ApiResponse<AppointmentResponse>> createAppointment(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @Valid @RequestBody AppointmentCreateRequest request) {
-        // TODO: Get customerId from JWT token
-        Long customerId = 1L;  // Hardcoded for now
+
+        Long customerId = currentUser.getId();
 
         AppointmentResponse appointment = appointmentService.createAppointment(customerId, request);
         return ResponseEntity
@@ -59,10 +62,11 @@ public class AppointmentController {
      */
     @GetMapping("/my-appointments")
     public ResponseEntity<ApiResponse<Page<AppointmentResponse>>> getMyAppointments(
+            @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        // TODO: Get customerId from JWT token
-        Long customerId = 1L;  // Hardcoded for now
+
+        Long customerId = currentUser.getId();
 
         Pageable pageable = PageRequest.of(page, size);
         Page<AppointmentResponse> appointments = appointmentService.getCustomerAppointments(customerId, pageable);
@@ -99,9 +103,11 @@ public class AppointmentController {
      * PUT /api/appointments/{id}/cancel
      */
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> cancelAppointment(@PathVariable Long id) {
-        // TODO: Get customerId from JWT token
-        Long customerId = 1L;  // Hardcoded for now
+    public ResponseEntity<ApiResponse<AppointmentResponse>> cancelAppointment(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @PathVariable Long id) {
+
+        Long customerId = currentUser.getId();
 
         AppointmentResponse appointment = appointmentService.cancelAppointment(id, customerId);
         return ResponseEntity.ok(ApiResponse.success("Appointment cancelled successfully", appointment));

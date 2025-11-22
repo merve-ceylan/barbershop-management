@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")  // For frontend access - will be configured properly later
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;
@@ -33,12 +33,12 @@ public class AuthController {
     }
 
     /**
-     * Login user
+     * Login user - Returns JWT token
      * POST /api/auth/login
      */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.loginWithToken(request);
+        AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
 

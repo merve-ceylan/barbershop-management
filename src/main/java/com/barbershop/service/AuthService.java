@@ -8,7 +8,12 @@ import com.barbershop.model.dto.response.AuthResponse;
 import com.barbershop.model.dto.response.UserResponse;
 import com.barbershop.model.entity.User;
 import com.barbershop.repository.UserRepository;
+import com.barbershop.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +25,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    // TODO: Add JwtTokenProvider when we implement JWT
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
 
     /**
      * Register a new customer
@@ -46,9 +52,9 @@ public class AuthService {
     }
 
     /**
-     * Login user (without JWT for now)
+     * Login user with JWT token
      */
-    public UserResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
@@ -58,35 +64,29 @@ public class AuthService {
             throw new UnauthorizedException("Account is deactivated");
         }
 
-        // Verify password
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid email or password");
-        }
+        // Authenticate
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
 
-        return UserResponse.fromEntity(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Generate JWT token
+        String jwt = tokenProvider.generateToken(user.getId());
+
+        return new AuthResponse(jwt, UserResponse.fromEntity(user));
     }
 
     /**
-     * Login with JWT (will be implemented later)
+     * Get current authenticated user
      */
-    public AuthResponse loginWithToken(LoginRequest request) {
-        // Verify credentials
-        UserResponse user = login(request);
-
-        // TODO: Generate JWT token
-        String token = "temporary-token-" + user.getId();
-
-        return new AuthResponse(token, user);
-    }
-
-    /**
-     * Verify user credentials
-     */
-    public boolean verifyPassword(String email, String password) {
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user == null) {
-            return false;
-        }
-        return passwordEncoder.matches(password, user.getPassword());
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("User not found"));
     }
 }
