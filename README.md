@@ -229,7 +229,7 @@ The application will be deployed to:
 - [x] Multi-service appointment support
 - [x] Staff scheduling and conflict detection
 - [x] Manual testing with Postman
-- [ ] JWT authentication and authorization
+- [x] JWT authentication and authorization
 - [ ] Unit and integration tests
 - [ ] API documentation (Swagger)
 - [ ] Email notifications
