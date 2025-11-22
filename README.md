@@ -74,8 +74,8 @@ A professional barber shop management system with customer booking portal and bu
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/barbershop-management-system.git
-cd barbershop-management-system
+git clone https://github.com/merve-ceylan/barbershop-management.git
+cd barbershop-management
 ```
 
 ### 2. Start MySQL with Docker
