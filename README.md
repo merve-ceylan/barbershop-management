@@ -7,13 +7,16 @@ A professional barber shop management system with customer booking portal and bu
 🔨 **Currently in Development** - Core backend functionality completed and tested.
 
 ### Completed Features
-- ✅ Core domain models (User, Service, Appointment, AppointmentItem, Staff, Review)
+
 - ✅ Multi-service appointment system (multiple services per booking)
 - ✅ Flexible staff assignment (different staff per service)
 - ✅ JPA repositories with custom queries
 - ✅ Service layer with business logic and validations
 - ✅ REST API controllers for all operations
-- ✅ Spring Security configuration (development mode)
+- ✅ JWT authentication and authorization ← NEW!
+- ✅ Role-based access control (ADMIN/CUSTOMER) ← NEW!
+- ✅ Token-based secure endpoints ← NEW!
+- ✅ Spring Security configuration with JWT filter
 - ✅ Exception handling with global error handling
 - ✅ Docker configuration for MySQL
 - ✅ Request/Response DTOs
@@ -21,7 +24,6 @@ A professional barber shop management system with customer booking portal and bu
 - ✅ All endpoints tested and working
 
 ### In Progress
-- 🔄 JWT authentication & authorization
 - 🔄 Swagger API documentation
 - 🔄 Frontend development
 
@@ -227,7 +229,7 @@ The application will be deployed to:
 - [x] Multi-service appointment support
 - [x] Staff scheduling and conflict detection
 - [x] Manual testing with Postman
-- [ ] JWT authentication and authorization
+- [x] JWT authentication and authorization
 - [ ] Unit and integration tests
 - [ ] API documentation (Swagger)
 - [ ] Email notifications
